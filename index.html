@@ -1,0 +1,293 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            body,p{margin:0;padding:0;}
+            label{
+                width:90px;
+                font-size:13px;
+                font-family: arial,sans-serif;
+                display:inline-block;
+            }
+            #center{
+                position:fixed;
+                left:50%;
+                top:50%;
+                width:800px;
+                height:400px;
+                margin-top:-200px;
+                margin-left:-400px;
+                padding-top:10px;
+                border-radius:1px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            }
+            .xsd,.xml{
+                float:left;
+                margin:0 10px 0 10px;
+                width:380px;
+                height:350px;
+            }
+            #xsdBox,#xmlBox{
+                width:380px;
+                height:300px;
+                margin-top:10px;
+                border:2px dashed #dcdcdc;
+                border-radius:5px;
+                color:#ccc;
+                text-align:center;
+                line-height:300px;
+                font-size:30px;
+               transition:all 0.2s ease;
+            }
+            #xsdBox p.nomal,#xmlBox p.nomal{
+               text-align:left;
+               font-size:12px;
+               line-height:16px;
+               padding:2px 10px;
+               color:#333;
+               background:transparent;
+            }
+            p .size{
+                float:right;
+            }  
+            #xsdBox:hover,#xmlBox:hover{
+                border:2px dashed #999;
+                color:#999;
+            }
+            #xmlBox:hover{
+                overflow-y:auto;
+            }
+
+            #xsdBox.hover,#xmlBox.hover{
+                border-width:1px;
+                border-color:rgb(181,218,255);
+                border-style:solid;
+                box-shadow:0 0 10px rgb(181,218,255);
+            }
+            #xmlBox{
+                overflow:hidden;
+            }
+            p:nth-child(even){background:rgb(241, 232, 232);}
+            p:nth-child(odd){background:rgb(206, 198, 198);}
+            .validate,.error{
+                font-size:13px;
+                padding-left:10px;
+                line-height:18px;
+                border-bottom:1px solid #fff;
+            }
+            .validate{
+                font-weight:bold;
+                color:green;
+            }
+            .error em{
+                font-style:normal;
+                font-weight:bold;
+                color:red;
+                display:inline-block;
+                width:100px;
+            }
+            .error span{
+                font-weight:bold;
+            }
+            input[type="submit"]{
+                background-image: -webkit-linear-gradient(top,#f5f5f5,#f1f1f1);
+                background-color: #f5f5f5;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                border-radius: 2px;
+                color: #666;
+                cursor: default;
+                font-family: arial,sans-serif;
+                font-size: 12px;
+                font-weight: bold;
+                height: 29px;
+                line-height: 27px;
+                margin: 2px 10px;
+                min-width: 54px;
+                padding: 0 8px;
+                text-align: center;
+            }
+            input[type="submit"]:hover{
+                background-image: -webkit-linear-gradient(top,#f8f8f8,#f1f1f1);
+                -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+                background-color: #f8f8f8;
+                border: 1px solid #c6c6c6;
+                box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+                color: #333;
+            }
+            #pg{
+                font-size:12px;
+                height:30px;
+                line-height:30px;
+                color: #0077cc;
+                display:none;
+            }
+            #pg span{
+                padding:0 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="center">
+            <div class="xml">
+                <div><label>xml文件：</label></div>
+                <div id="xmlBox">可拖拽多个xml文件、文件夹</div>
+            </div>
+            <input type="submit" name="submit" value="验证" id='btn'>
+        </div>
+        <div id="pg"><span id="fn"></span><progress id="pgBar"></progress><span id="percent"></span></div>
+        <div id="info"></div>
+        <script>
+            var xmlfiles=[],info,fn,pgBar,percent,pg;
+
+            function $id(id){
+                return document.getElementById(id);
+            }
+            function Output(id,msg,clear){
+                var m = $id(id);
+                m.innerHTML = clear ? msg : msg + m.innerHTML; 
+            }
+            function bind(elem,ent,handler){
+                var ents = ent.split(' '); 
+                for(var i=0,len=ents.length;i<len;i++){
+                    elem.addEventListener(ents[i],handler,false);                
+                }
+            }
+            //initialize
+            function init(){
+                var xmlBox = $id('xmlBox'),
+                    btn = $id('btn');
+
+                info = $id('info');
+                fn = $id('fn');
+                pgBar = $id('pgBar');
+                pg = $id('pg');
+                percent = $id('percent');
+
+                //file drop
+                bind(xmlBox,'dragover dragleave',fileDragHover);
+                bind(xmlBox,'drop',fileSelectHandler);
+
+                //sumbmit
+                bind(btn,'click',submit);
+            }
+            function fileDragHover(e){
+                e.stopPropagation();
+                e.preventDefault();
+                var node = e.currentTarget;
+                if(node.id !='xmlBox')
+                    return;
+
+                node.className = e.type == 'dragover' ? 'hover' : '';
+            }
+
+            function fileSelectHandler(e){
+                //cancel event and hover styling
+                fileDragHover(e);
+
+                var items = e.dataTransfer.items,
+                    files = [],
+                    entry;
+
+                for(var i =0,len = items.length;i<len;i++){
+                    if(items[i].kind == 'file') 
+                        files.push(items[i]); 
+                }
+
+                if(files.length == 0)
+                    return;
+
+                if(e.target.lastChild.nodeType ==3)
+                    Output(e.target.id,'',true);
+
+                //output file info
+                for(var i =0,len=files.length;i<len;i++){
+                    entry = files[i].webkitGetAsEntry();
+                    enumEntry(entry,e.target.id,handleFile);
+               }
+            }
+            function handleFile(id,fileEntry){
+                fileEntry.file(function(file){
+                    xmlfiles.push(file);
+                    fileInfo(id,file);
+                });
+            }
+            function enumEntry(entry,id,callback){
+                if(entry.isFile){
+                    callback.call(null,id,entry);
+                }else if(entry.isDirectory){
+                    var dir = entry.createReader(); 
+
+                        dir.readEntries(function(entries){
+                            if(entries.length){
+                                for(var i=0,len=entries.length;i<len;i++){
+                                    enumEntry(entries[i],id,callback);
+                                }
+                            }
+                        },function(e){
+                            console.log(e);
+                        });
+                }
+            }
+            function fileInfo(id,file){
+                Output(
+                    id,
+                    '<p class="nomal"><strong>'+ file.name +
+                        '</strong><span class="size"> size: <strong>' + (file.size/1024).toFixed(2) +
+                            '</strong> KB</span></p>'
+                );
+            }
+            
+            function submit(){
+                if(xmlfiles.length>0){
+                    doXHR(xmlfiles.shift());                        
+                    //hidden pan
+                    $id('center').style.display = 'none';
+                }
+            }
+            function doXHR(xml){
+                if(!xml){
+                    return;
+                }
+
+                var xhr = new XMLHttpRequest(),formData = new FormData();
+                bind(xhr.upload,'loadstart progress load',xhrProgress);
+
+                //formData.append('schema',xsd);
+                formData.append('picture',xml);
+                formData.append('count',xmlfiles.length);
+
+                xhr.open('POST','upload',true);
+                //xhr.setRequestHeader('Content-Type','multipart/form-data');
+                xhr.onreadystatechange = function(e){
+                    if(xhr.readyState==4){
+                        if(xhr.status == 200){
+                           info.innerHTML += e.target.response; 
+                           doXHR(xmlfiles.shift()); 
+                        }else{
+
+                        }
+                    } 
+                };
+                xhr.send(formData);
+                //fn.innerHTML = '处理' + xml.name;
+            }
+            function xhrProgress(e){
+                var total=e.total,
+                    loaded=e.loaded;
+                    
+                if(e.type == 'loadstart'){
+                    pg.style.display = 'block';
+
+                }else if(e.type == 'progress'){
+                    pgBar.max = total;
+                    pgBar.value = loaded;
+                    percent.innerHTML = '<strong>' + Math.floor(loaded*100/total) + '%上传</strong>';
+                }else if(e.type == 'load'){
+                    pg.style.display = 'none';
+                } 
+            }
+
+            init();
+        </script>
+    </body>
+</html>
