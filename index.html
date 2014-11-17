@@ -137,7 +137,7 @@
         <div id="pg"><span id="fn"></span><progress id="pgBar"></progress><span id="percent"></span></div>
         <div id="info"></div>
         <script>
-            var xmlfiles=[],info,fn,pgBar,percent,pg;
+            var xmlfiles=[],info,uid,uploading,fn,pgBar,percent,pg;
 
             function $id(id){
                 return document.getElementById(id);
@@ -238,7 +238,9 @@
             }
             
             function submit(){
-                if(xmlfiles.length>0){
+                if(xmlfiles.length>0 && !uploading){
+                    uid = +new Date();
+                    uploading = true;
                     doXHR(xmlfiles.shift());                        
                     //hidden pan
                     $id('center').style.display = 'none';
@@ -246,6 +248,7 @@
             }
             function doXHR(xml){
                 if(!xml){
+                    uploading = false;
                     return;
                 }
 
@@ -255,6 +258,7 @@
                 //formData.append('schema',xsd);
                 formData.append('picture',xml);
                 formData.append('count',xmlfiles.length);
+                formData.append('uid',uid);
 
                 xhr.open('POST','upload',true);
                 //xhr.setRequestHeader('Content-Type','multipart/form-data');
