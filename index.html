@@ -249,6 +249,7 @@
             function doXHR(xml){
                 if(!xml){
                     uploading = false;
+                    checkStatus();
                     return;
                 }
 
@@ -274,6 +275,28 @@
                 };
                 xhr.send(formData);
                 //fn.innerHTML = '处理' + xml.name;
+            }
+            function checkStatus(){
+                var stop = false;
+                var timer = setTimeout(function(){
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', 'status?uid='+uid, true);
+                        xhr.onreadystatechange = function(e){
+                            if(xhr.readyState==4){
+                                if(xhr.status == 200 && e.target.response != 0){
+                                    info.innerHTML += '<a href="'+e.target.response+'">demo</a>';
+                                    stop = true;
+                                    clearTimeout(timer);
+                                }else{
+
+                                }
+                            } 
+                        };
+                        xhr.send(null);
+                        if(!stop){
+                            timer = setTimeout(arguments.callee, 1000);     
+                        }
+                    },1000);
             }
             function xhrProgress(e){
                 var total=e.total,

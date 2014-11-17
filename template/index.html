@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+<style>
+.wrap{
+    position:relative;
+    width:500px;
+    height:190px;
+    margin:20px auto;
+}
+
+</style>
+</head>
+<body style="text-align:center">
+<div class="wrap">
+    <canvas width=500 height=230 id='can'></canvas>
+</div>
+
+</body>
+
+<script>
+var bds = {};
+bds.comm = {};
+bds.comm.uri_base = 'http:\/\/tc-off-bc-dailyzd0-2.tc.baidu.com:8090\/\/static\/amd\/amd\/js';
+</script>
+<script src="http://tc-off-bc-dailyzd0-2.tc.baidu.com:8090/static/www/js/jquery-1.10.2.min.js"></script>
+<script src="http://tc-off-bc-dailyzd0-2.tc.baidu.com:8090/static/www/js/esl.js"></script>
+<script src="/output/{%uid%}/frames.js"></script>
+<script>
+var canvas = document.getElementById('can');
+
+var ctx = canvas.getContext('2d');
+var img = new Image();
+img.src = '/output/{%uid%}/out.png';
+img.onload = function(){
+    render();
+};
+
+function render(){
+    require(['timeline','movie'],function(timeline,movie){
+        var tline = new timeline({
+                beforeProcess : function(){
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                }
+        });
+
+        var m2 = new movie({
+            img:img,
+            embedTo:canvas,
+            wrap:'.wrap',
+            frames:data.frames
+        });
+            
+        tline.createTask({
+            processing : function(counter){           
+                m2.render();
+            }
+        });
+            
+        m2.createDebugger();
+    });
+};
+</script>
+</html>
