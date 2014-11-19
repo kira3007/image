@@ -4,8 +4,8 @@
 <style>
 .wrap{
     position:relative;
-    width:500px;
-    height:190px;
+    width:{%width%}px;
+    height:{%height%}px;
     margin:20px auto;
 }
 
@@ -13,7 +13,7 @@
 </head>
 <body style="text-align:center">
 <div class="wrap">
-    <canvas width=500 height=230 id='can'></canvas>
+    <canvas width={%width%} height={%height%} id='can'></canvas>
 </div>
 
 </body>

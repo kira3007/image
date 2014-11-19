@@ -1,10 +1,11 @@
 <!doctype html>
 <html>
     <head>
+        <meta charset="UTF-8">
+        <title>上传图片</title>
         <style>
             body,p{margin:0;padding:0;}
             label{
-                width:90px;
                 font-size:13px;
                 font-family: arial,sans-serif;
                 display:inline-block;
@@ -22,13 +23,10 @@
                 box-shadow: 0 1px 4px rgba(0,0,0,0.2);
             }
             .xsd,.xml{
-                float:left;
                 margin:0 10px 0 10px;
-                width:380px;
                 height:350px;
             }
             #xsdBox,#xmlBox{
-                width:380px;
                 height:300px;
                 margin-top:10px;
                 border:2px dashed #dcdcdc;
@@ -89,7 +87,8 @@
             .error span{
                 font-weight:bold;
             }
-            input[type="submit"]{
+
+            .demo,input[type="submit"]{
                 background-image: -webkit-linear-gradient(top,#f5f5f5,#f1f1f1);
                 background-color: #f5f5f5;
                 border: 1px solid rgba(0, 0, 0, 0.1);
@@ -106,6 +105,7 @@
                 padding: 0 8px;
                 text-align: center;
             }
+            .demo:hover,
             input[type="submit"]:hover{
                 background-image: -webkit-linear-gradient(top,#f8f8f8,#f1f1f1);
                 -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
@@ -113,6 +113,12 @@
                 border: 1px solid #c6c6c6;
                 box-shadow: 0 1px 1px rgba(0,0,0,0.1);
                 color: #333;
+            }
+           .demo{
+                cursor:pointer;
+                margin-top:10px;
+                text-decoration:none;
+                display:block;
             }
             #pg{
                 font-size:12px;
@@ -129,8 +135,8 @@
     <body>
         <div id="center">
             <div class="xml">
-                <div><label>xml文件：</label></div>
-                <div id="xmlBox">可拖拽多个xml文件、文件夹</div>
+                <div><label>PNG图片，序号从1开始：</label></div>
+                <div id="xmlBox">可拖拽多个png文件、文件夹</div>
             </div>
             <input type="submit" name="submit" value="验证" id='btn'>
         </div>
@@ -266,8 +272,8 @@
                 xhr.onreadystatechange = function(e){
                     if(xhr.readyState==4){
                         if(xhr.status == 200){
-                           info.innerHTML += e.target.response; 
-                           doXHR(xmlfiles.shift()); 
+                            info.innerHTML += '<p>' + e.target.response + '</p>'; 
+                            doXHR(xmlfiles.shift()); 
                         }else{
 
                         }
@@ -284,7 +290,7 @@
                         xhr.onreadystatechange = function(e){
                             if(xhr.readyState==4){
                                 if(xhr.status == 200 && e.target.response != 0){
-                                    info.innerHTML += '<a href="'+e.target.response+'">demo</a>';
+                                    info.innerHTML += '<a class="demo" href="'+e.target.response+'">DEMO</a>';
                                     stop = true;
                                     clearTimeout(timer);
                                 }else{
