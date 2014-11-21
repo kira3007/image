@@ -142,6 +142,7 @@
         </div>
         <div id="pg"><span id="fn"></span><progress id="pgBar"></progress><span id="percent"></span></div>
         <div id="info"></div>
+        <script src="/template/validate.js"></script>
         <script>
             var xmlfiles=[],info,uid,uploading,fn,pgBar,percent,pg;
 
@@ -245,6 +246,12 @@
             
             function submit(){
                 if(xmlfiles.length>0 && !uploading){
+                    var check_status = validate(xmlfiles.map(function(item){return item.name;}));
+                    if(!check_status.validate){
+                        alert(check_status.message);
+                        return false; 
+                    }
+
                     uid = +new Date();
                     uploading = true;
                     doXHR(xmlfiles.shift());                        
